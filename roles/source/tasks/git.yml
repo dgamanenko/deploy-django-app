@@ -1,0 +1,54 @@
+---
+
+- name: ensure git installed
+  apt:
+    name: git
+  become: yes
+
+- name: ensure private keys has mode 0400
+  file:
+    dest: "{{ item.key_file }}"
+    mode: 0400
+  when: item.key_file is defined
+  with_items: "{{ source_sources }}"
+
+- name: ensure the repositories is synced
+  git:
+    accept_hostkey: "{{ item.accept_hostkey | default(source_default_accept_hostkey) }}"
+    bare: "{{ item.bare | default(source_default_bare) }}"
+    dest: "{{ item.dest }}"
+    force: "{{ item.force | default(source_default_force) }}"
+    key_file: "{{ item.key_file | default(source_default_key_file) }}"
+    recursive: "{{ item.recursive | default(source_default_recursive) }}"
+    remote: "{{ item.remote | default(source_default_remote) }}"
+    repo: "{{ item.repo }}"
+    ssh_opts: "{{ item.ssh_opts | default(source_default_ssh_opts) }}"
+    version: "{{ item.version | default(source_default_version) }}"
+  when: item.dest|default("") != ""
+  with_items: "{{ source_sources }}"
+  notify: source git reload
+  register: source_git_changed
+  become_user: "{{ source_user }}"
+
+- name: update submodules
+  shell: "git submodule update --init chdir={{ item.dest }}"
+  when: item.fix_submodules is defined and item.fix_submodules
+  with_items: "{{ source_sources }}"
+  changed_when: false
+  become_user: "{{ source_user }}"
+
+- name: clean sources
+  shell: "git clean -fd chdir={{ item.dest }}"
+  when: item.clean is defined and item.clean
+  with_items: "{{ source_sources }}"
+  changed_when: false
+  become_user: "{{ source_user }}"
+
+- name: ensure directory exist
+  file: 
+    dest: "{{ item.dest | default(source_default_dest) }}"
+    state: directory
+    owner: "{{ source_user }}"
+    group: "{{ source_group }}"
+  with_items: "{{ source_sources }}"
+

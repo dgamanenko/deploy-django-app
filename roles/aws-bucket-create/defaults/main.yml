@@ -1,0 +1,6 @@
+---
+aws_bucket_create: yes
+aws_access_key: "{{ vault.aws_access_key }}"
+aws_secret_key: "{{ vault.aws_secret }}"
+region: "{{ vault.buckets_region }}"
+s3buckets: []

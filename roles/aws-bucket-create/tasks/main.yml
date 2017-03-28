@@ -1,0 +1,4 @@
+---
+- include: bucket.yml
+  when: aws_bucket_create
+  tags: [bucket]

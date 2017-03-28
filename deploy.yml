@@ -1,0 +1,129 @@
+- hosts: localhost
+  connection: local
+
+  roles:
+    - role: deploy
+#      when: undef is defined
+    - role: nginx
+#      when: undef is defined
+    - role: python
+#      when: undef is defined
+    - role: source
+#      when: undef is defined
+    - role: npm
+#      when: undef is defined
+    - role: django
+#      when: undef is defined
+    - role: configure-backups
+#      when: undef is defined
+
+  vars:
+    deploy_app_name: sciencesurgery
+    deploy_user: django
+    deploy_dir: /home/django/sciencesurgery
+
+    python_versions: [3.6]
+    #python_install: [django, gunicorn]
+    python_virtualenvs:
+    - path: "{{ deploy_dir}}/env"
+      python: python3.6
+    python_virtualenv_user: "{{ deploy_user }}" 
+
+    source_sources:
+    - repo: https://gitlab.raccoongang.com/scinceDevs/ScienceSurgery.git
+      dest: "{{ deploy_dir }}/src"
+      version: master
+
+    wsgi_applications:
+    - name: sciencesurgery
+      nginx_servernames: sciencesurgery.com
+      file: "{{ deploy_dir }}/src/science_surgery/wsgi.py"
+      etc_dir: "{{ wsgi_etc_dir }}"
+      log_dir: "{{ wsgi_log_dir }}"
+      run_dir: "{{ wsgi_run_dir }}"
+      virtualenv: "{{ wsgi_virtualenv }}"
+      gulp_static: "{{  wsgi_nginx_static_gulp }}"
+      port: 81
+      ssl: yes
+      ssl_port: 443
+      nginx_ssl_crt: "/etc/letsencrypt/live/sciencesurgery.com/fullchain.pem"
+      nginx_ssl_key: "/etc/letsencrypt/live/sciencesurgery.com/privkey.pem"
+      nginx_ssl_redirect: yes
+    wsgi_virtualenv: "{{deploy_dir}}/env" 
+    wsgi_etc_dir: "{{deploy_dir}}/etc"
+    wsgi_log_dir: "{{deploy_dir}}/log"
+    wsgi_run_dir: "{{deploy_dir}}/run"
+    wsgi_app_dir: "{{deploy_dir}}"
+    wsgi_nginx_static_gulp: "{{deploy_dir}}/static"
+    wsgi_nginx_static_locations: [/media/]
+    wsgi_nginx_static_location_node_modules_locations: [/static/node_modules/]
+    wsgi_nginx_static_gulp_locations: [/static/] 
+    wsgi_nginx_port: 81
+    wsgi_nginx_ssl: yes
+    wsgi_nginx_ssl_crt: "/etc/letsencrypt/live/sciencesurgery.com/fullchain.pem"                                 
+    wsgi_nginx_ssl_key: "/etc/letsencrypt/live/sciencesurgery.com/privkey.pem"                                  
+    wsgi_nginx_ssl_port: 443
+    wsgi_nginx_ssl_redirect: yes
+
+    postgresql_version: 9.6
+    postgresql_service_name: postgresql
+    postgresql_password: "{{ vault.postgresql_password }}"
+    db_name: "{{deploy_app_name}}"
+    create_db: yes
+    root_user:
+      name: "{{deploy_app_name}}"
+      password: "{{ postgresql_password }}"
+
+    django_manage_list:
+      - migrate
+      - collectstatic
+    django_settings_additional:
+      - STATIC_ROOT = "{{ wsgi_nginx_static_gulp}}"
+
+      - DEBUG = False
+      - ALLOWED_HOSTS = ['*']
+
+      - EMAIL_HOST = '{{ vault.EMAIL_HOST }}'
+      - EMAIL_HOST_PASSWORD = '{{ vault.EMAIL_HOST_PASSWORD  }}'
+      - EMAIL_HOST_USER = '{{ vault.EMAIL_HOST_USER  }}'
+      - EMAIL_PORT = {{ vault.EMAIL_PORT  }}
+      - EMAIL_USE_TLS = {{ vault.EMAIL_USE_TLS  }}
+      - DEFAULT_FROM_EMAIL = '{{ vault.DEFAULT_FROM_EMAIL  }}'
+
+    django_app_requirements: "{{ deploy_dir }}/src/requirements.txt"
+    django_app_virtual_env: "{{deploy_dir}}/env"
+    django_settings_module: "science_surgery.settings"
+    django_app_dir: "{{ deploy_dir }}/src"
+    django_settings_dir: "{{ deploy_dir }}/src/science_surgery"
+    django_settings: "{{ django_settings_dir }}/local_settings.py"
+    django_settings_databases:
+    - default:
+        ENGINE: 'django.db.backends.postgresql'
+        NAME: "{{deploy_app_name}}"
+        USER: "{{deploy_app_name}}"
+        PASSWORD: "{{ postgresql_password }}"
+        HOST: "localhost"
+        PORT: 5432
+
+    backup_target_user: "{{ vault.aws_access_key }}"
+    backup_target_pass: "{{ vault.aws_secret }}"
+    backup_postgresql_bucket: "{{ deploy_app_name }}backupproj"
+    backup_postgresql_monthly_bucket: "{{ deploy_app_name }}backupmonthlyproj"
+    s3buckets:
+      - "{{ backup_postgresql_bucket }}"
+      - "{{ backup_postgresql_monthly_bucket }}"
+#    region: "{{ vault.region }}"
+    backup_profiles:
+    - name: postgresql
+      schedule: 0 4 * * *                       # At 4am every day
+      source: "postgresql://{{ deploy_app_name }}"             # Backup prefixes: postgresql://, mysql://, mongo://
+      #target: "s3://s3-{{ region }}.amazonaws.com/{{ backup_postgresql_bucket }}/postgresql"
+      target: "s3://s3.amazonaws.com/{{ backup_postgresql_bucket }}/postgresql"
+      user: postgres
+
+    - name: postgresql_monthly
+      schedule: 0 1 1 * *                       # At 1am every 1st of month
+      source: "postgresql://{{ deploy_app_name }}"             # Backup prefixes: postgresql://, mysql://, mongo://
+      #target: "s3://s3-{{ region }}.amazonaws.com/{{ backup_postgresql_bucket }}/postgresql"
+      target: "s3://s3.amazonaws.com/{{ backup_postgresql_bucket }}/postgresql"
+      user: postgres

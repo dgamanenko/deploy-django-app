@@ -1,0 +1,31 @@
+---
+- name: restart postgresql
+  service:
+    name: "{{ postgresql_service_name }}"
+    state: restarted
+  become_method: sudo
+  become: yes
+  become_user: root
+
+- name: create database 
+  postgresql_db:
+    name: "{{ db_name }}"
+    encoding: "UTF-8"
+    lc_collate: "en_US.UTF-8"
+    lc_ctype: "en_US.UTF-8"
+    template: "template0"
+    state: present
+  become_method: sudo
+  become: yes
+  become_user: postgres
+
+- name: create postgresql user
+  postgresql_user:
+    name: "{{ root_user.name }}"
+    password: "{{ root_user.password }}"
+    role_attr_flags: "SUPERUSER,CREATEROLE,CREATEDB,INHERIT,LOGIN,REPLICATION"
+    state: present
+  become_method: sudo
+  become: yes
+  become_user: postgres
+

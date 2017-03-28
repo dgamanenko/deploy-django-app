@@ -1,0 +1,46 @@
+---
+- include_vars: "{{ansible_distribution}}.yml"
+
+- include: dirs.yml
+  tags: [wsgi, wsgi-dirs]
+
+- include: virtualenv.yml
+  tags: [wsgi, wsgi-virtualenv]
+
+- include: configure.yml
+  tags: [wsgi, wsgi-configure]
+
+- name: setup nginx configurations
+  template: 
+    src: nginx.conf.j2
+    dest: "{{ item.etc_dir|default('/home/django/%s/etc' % item.name) }}/{{ item.name }}-nginx.conf"
+    owner: "{{ wsgi_user }}"
+    group: "{{ wsgi_group }}"
+  when: item.proxy|default(wsgi_proxy) == 'nginx'
+  with_items: "{{ wsgi_applications }}"
+  notify: nginx reload 
+  tags: [wsgi, wsgi-nginx]
+
+- name: enable nginx sites
+  file:
+    state: link
+    dest: "{{ nginx_sites_dir }}/{{ item.name }}.conf"
+    src: "{{ item.etc_dir|default('/home/django/%s/etc' % item.name) }}/{{ item.name }}-nginx.conf"
+  when: item.proxy|default(wsgi_proxy) == 'nginx'
+  with_items: "{{ wsgi_applications }}"
+  tags: [wsgi, wsgi-nginx]
+  become_method: sudo
+  become: yes
+  become_user: root
+
+- name: configure log rotation
+  template:
+    src: logrotate.conf.j2
+    dest: "/etc/logrotate.d/{{ item.name }}-wsgi.conf"
+  with_items: "{{ wsgi_applications }}"
+  when: wsgi_log_rotate
+  tags: [wsgi, wsgi-logrotate]
+  become_method: sudo
+  become: yes
+  become_user: root
+

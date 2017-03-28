@@ -1,0 +1,19 @@
+---
+- name: prepare django settings
+  template:
+    src: settings.py.j2
+    dest: "{{ django_etc_dir }}/settings.py"
+  notify: wsgi restart
+
+- name: check for settings directory exists
+  stat:
+    path: "{{ django_settings_dir }}"
+  register: check_path
+
+- name: link django settings
+  file:
+    src: "{{ django_etc_dir }}/settings.py"
+    dest: "{{ django_settings }}"
+    state: link
+  when: check_path.stat.exists
+

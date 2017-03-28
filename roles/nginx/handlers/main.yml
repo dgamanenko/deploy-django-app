@@ -1,0 +1,17 @@
+---
+- name: nginx restart
+  service: 
+    name: "{{ nginx_service_name }}"
+    state: restarted
+  become_method: sudo
+  become: yes
+  become_user: root
+
+- name: nginx reload
+  service: 
+    name: "{{nginx_service_name}}"
+    state: reloaded
+  become_method: sudo
+  become: yes
+  become_user: root
+

@@ -1,0 +1,5 @@
+---
+- name: install project requirements
+  pip:
+    requirements: "{{ django_app_requirements }}"
+    virtualenv: "{{ django_app_virtual_env }}" 

@@ -1,0 +1,33 @@
+---
+- include: install.yml
+
+- name: Ensure that Nginx user is exist
+  user:
+    name: "{{ nginx_user }}"
+    system: yes
+
+- name: Delete default site
+  file:
+    path: "{{ nginx_default_site }}"
+    state: absent
+  when: nginx_delete_default_site
+  notify: nginx restart
+
+- name: Encrypt http auth passwords
+  htpasswd:
+    path: "{{ nginx_auth_file }}"
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+  with_items: "{{ nginx_auth_users }}"
+
+- name: Ensure the sites directory is exists
+  file:
+    name: "{{ nginx_sites_dir }}"
+    state: directory
+
+- name: Ensure that nginx is started
+  service: 
+    name: "{{ nginx_service_name }}"
+    state: started
+    enabled: yes
+

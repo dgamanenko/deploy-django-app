@@ -1,0 +1,4 @@
+---
+- include: npm.yml
+  when: npm_enabled
+  tags: [npm]

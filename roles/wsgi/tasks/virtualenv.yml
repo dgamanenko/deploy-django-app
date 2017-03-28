@@ -1,0 +1,26 @@
+---
+- name: prepare to setup virtualenv for applications
+  template:
+    dest: "{{ item.etc_dir|default('/home/django/%s/etc' % item.name) }}/virtualenv-{{ item.name }}.sh"
+    group: "{{ wsgi_group }}"
+    mode: 0755
+    owner: "{{ wsgi_user }}"
+    src: virtualenv.sh
+  with_items: "{{ wsgi_applications }}"
+
+- name: setup virtualenv for applications
+  shell: "{{ item.etc_dir|default('/home/django/%s/etc' % item.name)}}/virtualenv-{{item.name}}.sh "
+  with_items: "{{ wsgi_applications }}"
+  changed_when: False
+  become: yes
+
+- name: set virtualenv directory owner to wsgi user
+  file:
+    state: directory
+    path: "{{ item.virtualenv|default('/home/django/%s/env' % item.name ) }}"
+    owner: "{{ wsgi_user }}"
+    recurse: yes
+  with_items: "{{ wsgi_applications }}"
+  ignore_errors: yes
+  become: yes
+

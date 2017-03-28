@@ -1,0 +1,42 @@
+---
+
+- include_vars: "{{ansible_distribution}}.yml"
+
+- name: Install build-essential, npm
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: yes
+  with_items:
+    - build-essential
+    - npm
+  become_method: sudo
+  become: yes
+  become_user: root
+
+- name: Install python-pycurl
+  apt: name=python-pycurl
+  become_method: sudo
+  become: yes
+  become_user: root
+
+- name: Add python apt repository
+  apt_repository: repo={{python_ppa}} update_cache=yes
+  when: python_ppa != False and python_ppa != ""
+  become_method: sudo
+  become: yes
+  become_user: root
+
+- name: Install python
+  apt: name=python{{item}} state=present
+  with_items: "{{ python_versions }}"
+  become_method: sudo
+  become: yes
+  become_user: root
+
+- name: Install python-dev
+  apt: name=python{{item}}-dev state=present
+  with_items: "{{ python_versions }}"
+  become_method: sudo
+  become: yes
+  become_user: root

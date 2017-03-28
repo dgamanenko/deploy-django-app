@@ -1,0 +1,48 @@
+---
+
+source_enabled: yes                   # Enable role
+source_sources: []                    # Repositories to clone
+                                      # Define your sources here
+                                      # Ex: source_sources:
+                                        #   - repo: git@github.com:my/repo1.git
+                                        #     dest: /some/destination/path
+                                        #     version: develop
+                                        #     handlers:
+                                        #     - sudo restart myservice
+                                        #   - repo: git@github.com:my/repo2.git
+                                        #     dest: /some/another/path
+                                        #     version: master
+                                        #     handlers:
+                                        #     - cd /some/another/path && make static db
+                                        #     - sudo /etc/init.d/service restart
+
+source_sources_type: git              # Set repository type (git, hg)
+source_copy_keys: []                  # Copy defined key files from host to server in ~/.ssh/*
+source_ssh_keys: []                   # Copy keys from variables
+                                      #   source_ssh_keys:
+                                      #   - file_name: deploy
+                                      #     private_key: "KEY CONTENT"
+source_user: "{{deploy_user|default('deploy')}}" # Run from user
+source_group: "{{source_user}}"       # Run from group
+source_user_ssh_home: ~{{source_user}}/.ssh
+
+# Repository defaults (could be replaced individually)
+source_default_dest: ""               # Default destination
+source_default_force: yes             # Default force
+source_default_accept_hostkey: yes    # Accept hostkey (git)
+source_default_bare: no               # Clone bare by default (git)
+source_default_key_file: ""           # Default key file (git)
+source_default_recursive: yes         # Clone recursivly by default (git)
+source_default_remote: origin         # Default remote name (git)
+source_default_ssh_opts:              # Default ssh options (git)
+source_default_version: HEAD          # Default version (branch, tag, commit) (git)
+source_default_revision: default      # Default revision (branch, tag, commit) (hg)
+source_default_purge: no              # Default purge (hg)
+
+source_fingerprints:
+- 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCzPWGCORTV9bBTSGc7MUqc4eg+DnVnkor5u3ssss2NeWfQLa58SHFoXQdqzZHmsmPG4tZ7/T858X1Dzh5tpXnmuqUx4PAMyjDIIgeqo+BvHsXA6H2mBJHnuqzJ3iUoKxqPgWAdkC21EKma9Yd+qZ2lZaHy/lOMKa3VDc44OZk1+P+PT/7jACvPMPSQkxshxwt6VSVrcTlkEf3591YHKbh8lZJVMt6AxRJTskqfJZOzJW1ooc1Khl0qLJfnh37nl0QvNxe3uyCXi7BoYreBCOesTT7LGCE9GQvyTBXdRWxfiS+ab/yKL92KMW7YpU59aVYuyyReHCxlxOdefK1NgoIt Dmitry Sidorov'
+- 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDaRIBCe6mSndeL+RSiIG8GzdiUTbVR94MmTRs9Qp4Hgjm8eDzN4YpQdOlusCSigqUe/SHq01AGoue6xlaLwUQcl7rkq2fX8/vfGD9o7ZFh4AcFFV8P865ztE7wyGsSLlHqbPkoMHyxXz4O5X6ybDLlIzZODx+IiK20ESG26J4qu/HWF54MpXYWzOOYk5QBTK693TUl44om25AYl7S9zIneI3o9wdbZbQmbiF2jwagBbgZqCl97feiX3k1Wb6nJ+Wb7Ff9QSUvQVZV6H7TwrQ2iu4DKih1ZsPDV7qWjFO2kpkIF3Zb7mZfomS0Y8QQYrLayTaGNJKqlcIFtKZlnniHL ansible-generated on Dmitrys-MBP'
+- 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/Gq+nmS70jaeN6y4cvMHZRoELE3wp65vB538+X9gMflek+8BwUWP37sooSWBqmpxU+h1Yhum+BJKzavfO7rdXPAxxjd86HANHMNUs6hfjUwrgqfeR2DDGVqXMrudZU3yx1ynwQnal6Z2kD9SWliiMR/SZr5zhKcbis2KBCs+IOAUobtxkGH8a6aeitL2gWxSsPT8IXsuk9kyipEVAMqSJ10B+5HijlisIwM5uKL2gQ2mbKukLMmgovyEKBGnRe60d2tkJmP8u+xWZZBtIfzwqB6tnk4haMsbZS2/PCeTsFNdoTycAS17pnwmJ0p3mJ9Wf8M8a5HB4NL6mPHN7tL0t im@im-pc'
+- 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCrNN8D9R/onwu05uUmG8AjdLAvRClzI4znR3bZiZpsP8ZJPUvQPSEYYDkz4hlpPhfoZKl7JkLuT+rUHkRlQkGYqZrj7V4qBnMEtH66FYH4snbAx6AeGL0RS9NqTr3vMVpwg+C+V/RUBqlBOT51+bzcykYLFx58157BurF4f8rXz2D2JMKjlh0JotF3N5sWNAF3gJV1eAie22waG7g97jb7TWDaes1GTvRwZhTl4S0WsBje2YleuY7KXox/vIQohYlVMMkumb8p/Q7e6O7cWvLda9jFWPmtNOpGPpe6gM+DrRa6rDHCBn9HuHpuOrgQktBL8afdE9RQP+BFX5DtJZLp maxim@trambr'
+- 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC8GasOrSwJM9ZRonWcZ/VixJMxyFySvkgIhz8JffEA3AaOg676/jhPd659XY3NZoxW10Mfnm46eX2CarPwYnEyGL8D6NJZ0g9uJ08EP0y7sva4NZLsneRSWOeU8eWOzmxxBRTApfonhnXKdxMBskIWFuCunlgwplr0lISP4T3zLkbPB7Y9/P0m1doogSYaisGbAbh5Zj0jDYjnuNd25Gy2q2jpuoNBgNWzzoeQtDn8kh1ZvjvZgu++Ny68fsD4tqtmRJsleE1V4pqlY5K/d9gvetN/n1+lOEfK2sHp5MFGVWZACsiEdVlrS8fUfHtIlJKBha298MDzdfM77+rpbtRDWPzJfdD5WZxwd0T/n4xLJ+Qdsqyx6O7i2pIXxwnpjTd4FqC8njdPMftYK7BXc2hWIM8pxY40zy354zwqDv2ojPOVZj40rx5zunF7OLsHiqI2MZ1AxMhqNJpZPZh+Z2PTCzH0mHB8s8y/8YWOgnN+xDXjpXsZPqlkqwoJZpb0VXx73Sn39YA2E7MA4e6HQkySw6M4Ce/c7dLBRemcSuHgNQ0HBtr4mPc6i1SLT+f7Ymi6SJP2fS67GT+sC/jNH/ae1iJnPDJzZyUhNh3itQYOhL1+jotgYOAUOk4V0/UBSJLhpYE8q+ZATF8reHRF4FGkQkwPwT9U0WeJWvH/84f8VQ== jenkins@jenkins'
+

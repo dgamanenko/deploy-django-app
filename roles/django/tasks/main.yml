@@ -1,0 +1,4 @@
+---
+- include: requirements.yml
+- include: django.yml
+  when: django_enabled

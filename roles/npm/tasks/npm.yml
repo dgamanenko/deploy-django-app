@@ -1,0 +1,14 @@
+- name: remove node_modules
+  file:
+    path: "{{ deploy_dir }}/src/node_modules"
+    state: absent
+  become: yes
+  become_user: "{{ deploy_user }}"
+
+- name: install node
+  shell: "cd {{ deploy_dir }}/src/ && npm install"
+  become: yes
+  become_user: "{{ deploy_user }}"
+
+- name: run gulp sass
+  shell: "cd {{ deploy_dir }}/src/ && gulp sass"

@@ -1,0 +1,34 @@
+---
+- name: prepare configuration directories
+  file:
+    state: directory
+    path: "{{ item.etc_dir|default('/home/django/%s/etc' % item.name) }}"
+    owner: "{{ wsgi_user }}"
+    group: "{{ wsgi_group }}"
+  with_items: "{{ wsgi_applications }}"
+
+- name: prepare run directories
+  file:
+    state: directory
+    path: "{{ item.run_dir|default('/home/django/%s/run' % item.name) }}"
+    owner: "{{ wsgi_user }}"
+    group: "{{ wsgi_group }}"
+  with_items: "{{wsgi_applications}}"
+
+- name: prepare log directories
+  file:
+    state: directory
+    path: "{{ item.log_dir|default('/home/django/%s/log' % item.name) }}"
+    owner: "{{ wsgi_user }}"
+    group: "{{ wsgi_group }}"
+  with_items: "{{wsgi_applications}}"
+
+- name: Prepare static directories
+  file:
+    state: directory
+    path: "{{ item.gulp_static|default('/home/django/%s/static' % item.name) }}"
+    owner: "{{ wsgi_user }}"
+    group: "{{ wsgi_group }}"
+  with_items: "{{ wsgi_applications }}"
+  when: wsgi_nginx_static_gulp_locations is defined
+

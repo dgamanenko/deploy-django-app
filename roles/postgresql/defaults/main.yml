@@ -1,0 +1,6 @@
+postgresql_version: 9.6
+postgresql_service_name: postgresql
+db_name: database
+root_user:
+  name: postgres,
+  password: default
